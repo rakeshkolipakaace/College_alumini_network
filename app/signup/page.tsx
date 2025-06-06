@@ -113,6 +113,12 @@ export default function SignUpPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            name: data.name,
+            role: data.role,
+          }
+        }
       });
 
       if (authError) throw authError;
@@ -122,7 +128,7 @@ export default function SignUpPage() {
       }
 
       // Prepare user data for profile table
-      const userData = {
+      const userData: any = {
         id: authData.user.id,
         email: data.email,
         name: data.name,
@@ -132,19 +138,15 @@ export default function SignUpPage() {
 
       // Add role-specific fields
       if (data.role === "student") {
-        Object.assign(userData, {
-          batch_year: parseInt(data.batch_year),
-          department: data.department,
-          github_url: data.github_url || null,
-          leetcode_url: data.leetcode_url || null,
-        });
+        userData.batch_year = parseInt(data.batch_year);
+        userData.department = data.department;
+        userData.github_url = data.github_url || null;
+        userData.leetcode_url = data.leetcode_url || null;
       } else if (data.role === "alumni") {
-        Object.assign(userData, {
-          graduation_year: parseInt(data.graduation_year),
-          current_job: data.current_job,
-          linkedin_url: data.linkedin_url,
-          is_mentorship_available: data.is_mentorship_available || false,
-        });
+        userData.graduation_year = parseInt(data.graduation_year);
+        userData.current_job = data.current_job;
+        userData.linkedin_url = data.linkedin_url;
+        userData.is_mentorship_available = data.is_mentorship_available || false;
       }
 
       // Insert into users table
@@ -152,7 +154,10 @@ export default function SignUpPage() {
         .from("users")
         .insert([userData]);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        throw profileError;
+      }
 
       toast({
         title: "Account created",
@@ -161,12 +166,12 @@ export default function SignUpPage() {
       });
 
       router.push("/signup-success");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during signup:", error);
       toast({
         title: "Error",
         description:
-          "There was an error creating your account. Please try again.",
+          error.message || "There was an error creating your account. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -444,7 +449,7 @@ export default function SignUpPage() {
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/signin" className="text-primary hover:underline">
+            <Link href="/auth/signin" className="text-primary hover:underline">
               Sign in
             </Link>
           </p>

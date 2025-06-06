@@ -71,7 +71,10 @@ export default function SignInPage() {
         .eq("id", authData.user.id)
         .single();
 
-      if (userError) throw userError;
+      if (userError) {
+        console.error("User data error:", userError);
+        throw new Error("Failed to get user information");
+      }
 
       if (!userData?.is_approved) {
         router.push("/pending-approval");
@@ -86,6 +89,8 @@ export default function SignInPage() {
       // Redirect based on role
       if (userData.role === "admin") {
         router.push("/admin/dashboard");
+      } else if (userData.role === "alumni") {
+        router.push("/alumni/dashboard");
       } else {
         router.push("/student/dashboard");
       }
@@ -168,7 +173,7 @@ export default function SignInPage() {
         <CardFooter className="flex flex-col space-y-4">
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-primary hover:underline">
+            <Link href="/signup" className="text-primary hover:underline">
               Sign up
             </Link>
           </p>
@@ -176,4 +181,4 @@ export default function SignInPage() {
       </Card>
     </div>
   );
-} 
+}
