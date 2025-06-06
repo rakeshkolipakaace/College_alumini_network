@@ -49,7 +49,7 @@ export default function DashboardLayout({
       icon: <Home className="h-5 w-5" />,
     },
     {
-      href: `/${role}/profile`,
+      href: `/profile/${role}`,
       label: "Profile",
       icon: <User className="h-5 w-5" />,
     },

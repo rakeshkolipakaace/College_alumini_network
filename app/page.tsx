@@ -27,7 +27,7 @@ export default function Home() {
           <Link href="/auth/signin">
             <Button variant="outline">Sign In</Button>
           </Link>
-          <Link href="/signup">
+          <Link href="/auth/signup">
             <Button>Join Now</Button>
           </Link>
         </div>
@@ -48,7 +48,7 @@ export default function Home() {
               professional network.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link href="/signup">
+              <Link href="/auth/signup">
                 <Button size="lg" className="w-full sm:w-auto">
                   Get Started
                 </Button>
