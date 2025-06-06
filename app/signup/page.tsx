@@ -109,6 +109,23 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
+      // First check if user already exists in our users table
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("id, email")
+        .eq("email", data.email)
+        .single();
+
+      if (existingUser) {
+        toast({
+          title: "Account already exists",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // Sign up with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -121,7 +138,18 @@ export default function SignUpPage() {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        if (authError.message.includes("already registered")) {
+          toast({
+            title: "Account already exists",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        throw authError;
+      }
 
       if (!authData.user) {
         throw new Error("No user returned from sign up");
@@ -156,7 +184,11 @@ export default function SignUpPage() {
 
       if (profileError) {
         console.error("Profile creation error:", profileError);
-        throw profileError;
+        
+        // If profile creation fails, we should clean up the auth user
+        await supabase.auth.signOut();
+        
+        throw new Error(`Failed to create user profile: ${profileError.message}`);
       }
 
       toast({

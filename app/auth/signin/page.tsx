@@ -67,12 +67,24 @@ export default function SignInPage() {
       // Get user role and approval status
       const { data: userData, error: userError } = await supabase
         .from("users")
-        .select("role, is_approved")
+        .select("role, is_approved, name")
         .eq("id", authData.user.id)
         .single();
 
       if (userError) {
         console.error("User data error:", userError);
+        
+        // If user doesn't exist in users table, they might have signed up but profile creation failed
+        if (userError.code === 'PGRST116') {
+          toast({
+            title: "Account setup incomplete",
+            description: "Please complete your registration by signing up again.",
+            variant: "destructive",
+          });
+          router.push("/signup");
+          return;
+        }
+        
         throw new Error("Failed to get user information");
       }
 
@@ -83,7 +95,7 @@ export default function SignInPage() {
 
       toast({
         title: "Sign in successful",
-        description: "Welcome back!",
+        description: `Welcome back, ${userData.name || 'User'}!`,
       });
 
       // Redirect based on role
